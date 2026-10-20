@@ -386,16 +386,15 @@ details{color:var(--text-secondary)}
 @keyframes sfShine{0%{transform:translateX(-120%)}100%{transform:translateX(220%)}}
 @keyframes sfGlow{0%,100%{box-shadow:0 0 0 0 rgba(233,83,26,0)}50%{box-shadow:0 0 30px -6px rgba(233,83,26,.5)}}
 
-.screen.active .qwrap>*,.screen.active .hub>*,.screen.active .intro>*,.screen.active .res-hero>*,.screen.active .res-body>*{animation:sfRise .55s cubic-bezier(.2,.7,.2,1) both}
-.qwrap.enter>*{animation:sfRise2 .5s cubic-bezier(.2,.7,.2,1) both}
-.qwrap.enter #fList>.pref-q{animation:sfRise2 .5s cubic-bezier(.2,.7,.2,1) both}
-.screen.active #qlist>.q{animation:sfRise .5s cubic-bezier(.2,.7,.2,1) both}
-.screen.active .qwrap>*:nth-child(2),.screen.active .hub>*:nth-child(2),.screen.active .intro>*:nth-child(2),.screen.active .res-body>*:nth-child(2),.qwrap.enter>*:nth-child(2),.qwrap.enter #fList>.pref-q:nth-child(2),.screen.active #qlist>.q:nth-child(2){animation-delay:.05s}
-.screen.active .qwrap>*:nth-child(3),.screen.active .hub>*:nth-child(3),.screen.active .intro>*:nth-child(3),.screen.active .res-body>*:nth-child(3),.qwrap.enter>*:nth-child(3),.qwrap.enter #fList>.pref-q:nth-child(3),.screen.active #qlist>.q:nth-child(3){animation-delay:.1s}
-.screen.active .qwrap>*:nth-child(4),.screen.active .hub>*:nth-child(4),.screen.active .intro>*:nth-child(4),.screen.active .res-body>*:nth-child(4),.qwrap.enter>*:nth-child(4),.qwrap.enter #fList>.pref-q:nth-child(4),.screen.active #qlist>.q:nth-child(4){animation-delay:.15s}
-.screen.active .qwrap>*:nth-child(5),.screen.active .hub>*:nth-child(5),.screen.active .intro>*:nth-child(5),.screen.active .res-body>*:nth-child(5),.qwrap.enter>*:nth-child(5),.qwrap.enter #fList>.pref-q:nth-child(5),.screen.active #qlist>.q:nth-child(5){animation-delay:.2s}
-.screen.active .qwrap>*:nth-child(n+6),.screen.active .hub>*:nth-child(n+6),.screen.active .intro>*:nth-child(n+6),.screen.active .res-body>*:nth-child(n+6),.qwrap.enter>*:nth-child(n+6),.qwrap.enter #fList>.pref-q:nth-child(n+6),.screen.active #qlist>.q:nth-child(n+6){animation-delay:.25s}
-.pref-q.reveal{animation:sfReveal .4s cubic-bezier(.2,.7,.2,1) both}
+.screen.active .qwrap>*,.screen.active .hub>*,.screen.active .intro>*,.screen.active .res-hero>*,.screen.active .res-body>*{animation:sfRise .55s cubic-bezier(.2,.7,.2,1) backwards}
+.qwrap.enter #fList>.pref-q{animation:sfRise2 .5s cubic-bezier(.2,.7,.2,1) backwards}
+.screen.active #qlist>.q{animation:sfRise .5s cubic-bezier(.2,.7,.2,1) backwards}
+.screen.active .qwrap>*:nth-child(2),.screen.active .hub>*:nth-child(2),.screen.active .intro>*:nth-child(2),.screen.active .res-body>*:nth-child(2),.qwrap.enter #fList>.pref-q:nth-child(2),.screen.active #qlist>.q:nth-child(2){animation-delay:.05s}
+.screen.active .qwrap>*:nth-child(3),.screen.active .hub>*:nth-child(3),.screen.active .intro>*:nth-child(3),.screen.active .res-body>*:nth-child(3),.qwrap.enter #fList>.pref-q:nth-child(3),.screen.active #qlist>.q:nth-child(3){animation-delay:.1s}
+.screen.active .qwrap>*:nth-child(4),.screen.active .hub>*:nth-child(4),.screen.active .intro>*:nth-child(4),.screen.active .res-body>*:nth-child(4),.qwrap.enter #fList>.pref-q:nth-child(4),.screen.active #qlist>.q:nth-child(4){animation-delay:.15s}
+.screen.active .qwrap>*:nth-child(5),.screen.active .hub>*:nth-child(5),.screen.active .intro>*:nth-child(5),.screen.active .res-body>*:nth-child(5),.qwrap.enter #fList>.pref-q:nth-child(5),.screen.active #qlist>.q:nth-child(5){animation-delay:.2s}
+.screen.active .qwrap>*:nth-child(n+6),.screen.active .hub>*:nth-child(n+6),.screen.active .intro>*:nth-child(n+6),.screen.active .res-body>*:nth-child(n+6),.qwrap.enter #fList>.pref-q:nth-child(n+6),.screen.active #qlist>.q:nth-child(n+6){animation-delay:.25s}
+.pref-q.reveal{animation:sfReveal .4s cubic-bezier(.2,.7,.2,1) backwards}
 
 /* taps */
 .opt,.pref-opt,.goal-card,.qcard,.btn{transition:transform .14s ease,border-color .18s ease,background-color .18s ease}
@@ -409,10 +408,10 @@ details{color:var(--text-secondary)}
 .progress i,.hub-prog .bar i{position:relative;overflow:hidden;transition:width .6s cubic-bezier(.2,.7,.2,1)}
 .progress i::after,.hub-prog .bar i::after{content:"";position:absolute;top:0;bottom:0;width:40%;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:sfShine 2.6s ease-in-out infinite}
-.screen.active .pill .bar i{transform-origin:left center;animation:sfGrow 1s cubic-bezier(.2,.7,.2,1) .25s both}
-.screen.active .hub-prog .bar i{transform-origin:left center;animation:sfGrow .9s cubic-bezier(.2,.7,.2,1) .2s both}
-.hub-next{animation:sfRise .55s cubic-bezier(.2,.7,.2,1) both,sfGlow 3.6s ease-in-out 1s infinite}
-.screen.active .step .qcard{animation:sfRise .5s cubic-bezier(.2,.7,.2,1) both}
+.screen.active .pill .bar i{transform-origin:left center;animation:sfGrow 1s cubic-bezier(.2,.7,.2,1) .25s backwards}
+.screen.active .hub-prog .bar i{transform-origin:left center;animation:sfGrow .9s cubic-bezier(.2,.7,.2,1) .2s backwards}
+.hub-next{animation:sfRise .55s cubic-bezier(.2,.7,.2,1) backwards,sfGlow 3.6s ease-in-out 1s infinite}
+.screen.active .step .qcard{animation:sfRise .5s cubic-bezier(.2,.7,.2,1) backwards}
 .screen.active .step .qcard:nth-of-type(2){animation-delay:.06s}
 .screen.active .step .qcard:nth-of-type(3){animation-delay:.12s}
 .screen.active .step .qcard:nth-of-type(n+4){animation-delay:.18s}
@@ -427,6 +426,15 @@ details{color:var(--text-secondary)}
 .hub-lede{background:var(--surface-glass);border:1px solid var(--border-subtle);border-left:3px solid var(--accent);
   border-radius:20px;padding:18px 20px;margin-top:18px;color:var(--text-secondary)}
 .hub-lede:empty{display:none}
+
+/* form header is reused between steps: keep it out of animation so WebKit never paints a stale title */
+#screen-form #fEyebrow,#screen-form #fTitle,#screen-form #fSub,#screen-form #fCount{animation:none!important;transform:none}
+/* result blocks sit on plates so long instructions read off the dot grid */
+.rblock{background:rgba(30,29,34,.92);border:1px solid var(--border-subtle);border-radius:20px;padding:6px 20px 8px;margin-top:16px}
+.rblock .section-h{margin:14px 0 4px;color:var(--orange-bright)!important}
+.rline{padding:12px 0;border-bottom:1px solid var(--border-subtle);font-size:16px;line-height:24px;color:var(--text-secondary)}
+.rline:last-child{border-bottom:0}
+.rline b{color:var(--text-primary);font-weight:500}
 
 </style>
 </head>
@@ -2534,8 +2542,8 @@ function renderForm() {
   var prevKeys = window.__sfmQKeys || [], nowKeys = qsVis.map(function (q) { return q.key; });
   if (wrap) {
     wrap.classList.remove("enter");
-    if (window.__sfmLastScreen !== mkey) { void wrap.offsetWidth; wrap.classList.add("enter"); }
-    else nowKeys.forEach(function (k) { if (prevKeys.indexOf(k) < 0) { var n = document.getElementById("q_" + k); if (n) n.classList.add("reveal"); } });
+    if (window.__sfmLastScreen !== mkey) { F.seenEnd = false; void wrap.offsetWidth; wrap.classList.add("enter"); clearTimeout(window.__sfmEnterT); window.__sfmEnterT = setTimeout(function () { wrap.classList.remove("enter"); }, 900); }
+    else nowKeys.forEach(function (k) { if (prevKeys.indexOf(k) < 0) { var n = document.getElementById("q_" + k); if (n) { n.classList.add("reveal"); F.seenEnd = false; } } });
   }
   window.__sfmLastScreen = mkey; window.__sfmQKeys = nowKeys;
   updateNextBtn();
@@ -2676,8 +2684,29 @@ function screenAnswered() {
   var s = F.spec.screens[F.i], c = makeCtx(F.a);
   return (s.questions || []).some(function (q) { return qVisible(q, c) && !qOnFile(q) && answered(F.a[q.key]); });
 }
+/* Next stays dim until the member has scrolled to the end of the screen, so a
+   thumb cannot skip questions they never saw. Skipping on purpose still works. */
+function sfAtEnd() {
+  var end = document.getElementById("fErr"), nav = document.querySelector("#screen-form .navbar");
+  if (!end) return true;
+  var limit = window.innerHeight - (nav ? nav.offsetHeight : 0) + 4;
+  return end.getBoundingClientRect().top <= limit;
+}
+function sfCheckEnd() {
+  if (!F || !F.spec || F.seenEnd) return;
+  var sc = document.getElementById("screen-form"); if (!sc || !sc.classList.contains("active")) return;
+  if (sfAtEnd()) { F.seenEnd = true; updateNextBtn(); }
+}
+window.addEventListener("scroll", sfCheckEnd, { passive: true });
+window.addEventListener("resize", sfCheckEnd);
 function updateNextBtn() {
   var b = document.getElementById("fNext"), s = F.spec.screens[F.i];
+  if (!F.seenEnd && sfAtEnd()) F.seenEnd = true;
+  if (!F.seenEnd) {
+    b.disabled = true; b.textContent = "Scroll to see every question"; b.style.opacity = "";
+    setTimeout(sfCheckEnd, 650);
+    return;
+  }
   var last = firstScreen(F.i + 1) < 0;
   var req = missingRequired().length;
   b.disabled = false;
@@ -2752,9 +2781,9 @@ function renderResult(spec, r) {
   document.getElementById("frHead").innerHTML = r.headline || "Done. Thank you.";
   document.getElementById("frLede").innerHTML = (r.lede || "") + '<br><br><b style="color:#fff">Thank you. Your trainer has your answers and will be in touch shortly.</b>';
   document.getElementById("frBlocks").innerHTML = (r.blocks || []).filter(function (b) { return b && b.lines && b.lines.length; }).map(function (b) {
-    return '<div class="section-h">' + esc(b.title) + '</div>' + b.lines.map(function (l) {
-      return '<div style="padding:11px 0;border-bottom:1px solid var(--rule);font-size:14px;line-height:1.55;color:var(--ink-soft)">' + l + '</div>';
-    }).join("");
+    return '<div class="rblock"><div class="section-h">' + esc(b.title) + '</div>' + b.lines.map(function (l) {
+      return '<div class="rline">' + l + '</div>';
+    }).join("") + '</div>';
   }).join("");
   var next = nextUp(3).filter(function (q) { return q.id !== spec.id; }).slice(0, 2);
   var extra = (r.buttons || []).map(function (b) {
@@ -2908,12 +2937,11 @@ FORMS.consult = {
   id: "consult", num: 1, name: "Consultation Screen", short: "Consultation", version: "SFM Consultation Screen v1.1",
   mins: "About 3 minutes", consent: true, consentInline: true, safetyNote: true,
   title: "Make your first<br>session count.",
-  lede: "Three minutes now and you walk in with session 1 already built around what you want to still be doing in twenty years. You leave with a one-page summary of your results.",
+  lede: "Take 3 minutes to customize your first session based on your goals. You finish it with a summary and analysis of your strengths and the areas we will improve first, and session 2 builds straight from it.",
   screens: [
     { title: "About you", questions: [
       { key: "name", type: "text", shared: true, short: "Name", text: "Your name", ph: "First and last name" },
       { key: "email", type: "email", shared: true, short: "Email", text: "Email", ph: "you@example.com" },
-      { key: "phone", type: "tel", shared: true, short: "Mobile", text: "Mobile", sub: "For your booking confirmation only.", ph: "(555) 555 0123" },
       { key: "dob", type: "date", shared: true, fresh: 0, short: "Date of birth", text: "Date of birth" },
       { key: "sex", type: "single", shared: true, fresh: 0, short: "Sex", text: "Sex", opts: SEXES },
       { key: "studio", type: "single", shared: true, short: "Studio", text: "Nearest studio", opts: STUDIO_OPTS },
@@ -2935,7 +2963,7 @@ FORMS.consult = {
       { key: "first90", type: "single", text: "What would make the first 90 days worth it?",
         opts: [["capable", "Stronger and more capable"], ["recomp", "More muscle, less fat"], ["cardio", "Better heart and lung fitness"],
                ["scale", "A number on the scale"], ["injury", "Back from an injury"], ["unsure", "Not sure yet"]] },
-      { key: "why_now", type: "text", text: "In one sentence, why now?", ph: "Optional" }
+      { key: "why_now", type: "long", text: "Why are you choosing now to prioritize your health and long-term fitness? What are your motivations?", ph: "Optional" }
     ] },
     { title: "Before we train you hard", required: true,
       sub: "Four quick questions so we start you safely. A yes does not stop you training here; it tells us what to check first.",
@@ -2968,12 +2996,15 @@ FORMS.consult = {
     var sdq = qByKey("still_doing"), nmq = qByKey("never_measured");
     var blocks = [];
     if (sd.length) blocks.push({ title: "What you are training for", lines: ["Twenty years from now: " + esc(labelOf(sdq, sd, c).toLowerCase()) + "."] });
-    blocks.push({ title: "Your first visit", lines: [
-      "<b>A strength training session</b> with your trainer on Smart Strength, so you feel how we train before you decide anything.",
+    blocks.push({ title: "Your first session", lines: [
+      "<b>A strength training session</b> with your trainer on Smart Strength. It sets your starting loads for session 2.",
       "<b>Grip strength</b> on the dynamometer, compared with people your age and sex.",
       "<b>Blood pressure</b>, seated, before you train.",
       "<b>Smart BodyScan</b>, a 3D body scan: lean mass, body fat and visceral fat, in two minutes.",
-      "You leave with <b>a one-page summary of your results</b>."
+      "You finish with <b>a summary and analysis of your strengths and the areas we will improve first</b>."
+    ] });
+    blocks.push({ title: "Then session 2", lines: [
+      "Before you finish session 1, we book session 2. Your trainer builds it from your session 1 numbers and the quizzes you complete in between, so every session picks up where the last one ended."
     ] });
     blocks.push({ title: "How to prepare", lines: [
       "<b>For the body scan:</b> wear fitted clothing, like leggings or fitted shorts and a sports bra or fitted top. Loose clothes change the measurement. Tie long hair up off your neck.",
@@ -2985,7 +3016,7 @@ FORMS.consult = {
     var plan = pay.filter(function (x) { return /onepass|_af|other_plan/.test(x); }).length > 0;
     var payLines = [];
     if (hsa) payLines.push("You may be able to use your HSA or FSA for membership with a letter of medical necessity. We can help you get one through Truemed.");
-    if (plan) payLines.push("We will check your plan before your consult, so you know what it covers before you decide anything.");
+    if (plan) payLines.push("We check your plan ahead of session 1, so you know exactly what it covers as you start.");
     blocks.push({ title: "Paying for it", lines: payLines });
     var flags = safetyFlags(c);
     if (scaleOnly) flags.push("ROUTE_READ: scale-only answer, offer the five-minute read, no Longevity Assessment invitation");
@@ -2996,14 +3027,14 @@ FORMS.consult = {
     if (hasSafetyHold(c)) team.push("Safety: VO2max test waits for physician clearance");
     if (scaleOnly) team.push("Route: five-minute read, not the Longevity Assessment");
     return {
-      headline: scaleOnly ? "Start with the five-minute read." : "You are ready for your first visit.",
+      headline: scaleOnly ? "Start with the five-minute read." : "You are ready for session 1.",
       lede: scaleOnly
         ? "Grip, sit-to-stand and balance, printed against your age. It shows what the scale cannot, and it takes five minutes at the studio."
-        : "A strength session and three quick measurements. You leave with a one-page summary of your results.",
+        : "A strength session and three quick measurements. You finish with your strengths and the areas we will improve first, and session 2 builds from there.",
       blocks: blocks, flags: flags, team: team,
-      buttons: [].concat(BOOKING_URL ? [{ label: "Book your first visit", href: BOOKING_URL }] : [])
+      buttons: [].concat(BOOKING_URL ? [{ label: "Book session 1", href: BOOKING_URL }] : [])
                  .concat(hsa && TRUEMED_URL ? [{ label: "Start the Truemed letter", href: TRUEMED_URL }] : []),
-      insights: [scaleOnly ? "Next: the five-minute read at the studio." : "Next: your first visit. Wear fitted clothing and come hydrated."]
+      insights: [scaleOnly ? "Next: the five-minute read at the studio." : "Next: session 1. Wear fitted clothing and come hydrated."]
         .concat(hasSafetyHold(c) ? ["Bring physician clearance before your VO2max test."] : []),
       foot: "Your answers, for planning your training. Not medical advice."
     };
@@ -3780,7 +3811,7 @@ var STEPS = [
   { n: 1, id: "before", title: "Before your first session", required: true,
     lede: "Three minutes now means your first session is spent on you, not on paperwork." },
   { n: 2, id: "start", title: "Getting started", required: true,
-    lede: "So you can train hard and test safely from day one, with a program built around what you want from it." },
+    lede: "Health and Readiness clears you to train and test from day one. The Program Finder further customizes the program we recommend for you." },
   { n: 3, id: "personalize", title: "Personalize your program", required: false,
     lede: "The machines measure your body. These tell us how you live, what you eat and how you have been feeling, so your program fits your life and gets you there faster." },
   { n: 4, id: "improve", title: "Improve your results", required: false,
@@ -3818,7 +3849,11 @@ QUIZZES = [
     blurb: "Keep every block aimed at what has changed. Four minutes before each Check, so your re-test and your next block fit where you are now.",
     eligible: function (c) { var d = doneMap(); return !!(d.health || d.lifestyle || d.fatloss); } }
 ];
-QUIZZES.forEach(function (q) { q.ready = true; q.need = (q.step === "before" || q.step === "start") ? "Required" : "Optional"; });
+/* Before session 1: the Consultation Screen and Health and Readiness. The
+   Program Finder sits in step 2 but is optional before the first session. */
+var PRE_SESSION = ["consult", "health"];
+function isPre(q) { return PRE_SESSION.indexOf(q.id) >= 0; }
+QUIZZES.forEach(function (q) { q.ready = true; q.need = isPre(q) ? "Required" : "Optional"; });
 function qInfo(id) { return QUIZZES.filter(function (q) { return q.id === id; })[0]; }
 function eligibleQ(q, c) { return !q.eligible || q.eligible(c); }
 function stepOf(q) { return STEPS.filter(function (s) { return s.id === q.step; })[0]; }
@@ -3863,10 +3898,10 @@ function fmtDate(iso) { try { var d = new Date(iso); return MONTHS[d.getMonth()]
 
 function qCard(q, done, snaps, nx) {
   var started = !!formLoad(q.id), isDone = !!done[q.id], s = snaps[q.id] || {}, ins = s.insights || [];
-  var req = stepOf(q).required;
+  var req = isPre(q);
   var chip = isDone ? '<span class="chip done">Done</span>'
     : started ? '<span class="chip prog">In progress</span>'
-    : req ? '<span class="chip req">Required</span>' : '<span class="chip">Optional</span>';
+    : req ? '<span class="chip req">Before session 1</span>' : '<span class="chip">Optional</span>';
   return '<a class="qcard' + (isDone ? " is-done" : "") + (nx && nx.id === q.id ? " is-next" : "") + '" href="#" onclick="__sfmGo(\'' + q.id + '\');return false">' +
     '<div class="top"><span class="nm">' + (isDone ? '<span style="color:var(--tech-green-dark)">&#10003;</span> ' : '') + esc(q.name) + '</span>' + chip + '</div>' +
     (isDone && ins.length
@@ -3879,23 +3914,25 @@ function qCard(q, done, snaps, nx) {
 function renderHub() {
   var c = makeCtx({}), done = doneMap(), snaps = snapshots(), order = routeOrder(c);
   var shown = QUIZZES.filter(function (q) { return eligibleQ(q, c); });
-  var req = shown.filter(function (q) { return stepOf(q).required; });
+  var req = shown.filter(isPre);
   var reqDone = req.filter(function (q) { return done[q.id]; }).length;
   var nDone = shown.filter(function (q) { return done[q.id]; }).length;
   document.getElementById("hubHello").textContent = member.name ? "Hello " + member.name.split(" ")[0] : "Your profile";
   document.getElementById("hubLede").innerHTML = reqDone < req.length
-    ? 'Welcome to The Smart Fit Method&trade;. <b>Steps 1 and 2 are required</b>: they keep you safe and build your program. ' +
-      'Steps 3 and 4 are optional. Every one you finish makes your program fit you better and gets you to your result sooner. ' +
-      'You do not need to do them in one sitting: your answers save as you go, so work through them over your first few weeks.'
-    : 'You are cleared and your program is set. Every quiz in steps 3 and 4 makes it fit you better.';
+    ? 'Welcome to The Smart Fit Method&trade;. Steps 1 and 2 personalize your consultation sessions and make sure you are cleared for exercise. ' +
+      'Steps 3 and 4 further personalize your program and enhance your results.<br><br>' +
+      'Please complete the <b>Consultation Screen</b> and <b>Health and Readiness</b> before your first session. ' +
+      'The <b>Program Finder</b> is optional before your first session, and it further customizes the program we recommend for you. ' +
+      'Your answers save as you go, so work through the rest over your first few weeks.'
+    : 'You are ready for your first session. Every quiz you add from here further personalizes your program and enhances your results.';
   var pct = shown.length ? Math.round(100 * nDone / shown.length) : 0;
   document.getElementById("hubProgress").innerHTML =
-    '<div class="row"><span>Required ' + reqDone + ' of ' + req.length + '</span><span>All ' + nDone + ' of ' + shown.length + '</span></div>' +
+    '<div class="row"><span>Before session 1: ' + reqDone + ' of ' + req.length + '</span><span>All ' + nDone + ' of ' + shown.length + '</span></div>' +
     '<div class="bar"><i style="width:' + pct + '%"></i></div>';
 
   var nx = nextUp(1, c)[0];
   document.getElementById("hubNext").innerHTML = nx
-    ? '<div class="hub-next"><div class="k">Next up &middot; step ' + stepOf(nx).n + (stepOf(nx).required ? " &middot; required" : "") + '</div>' +
+    ? '<div class="hub-next"><div class="k">Next up &middot; step ' + stepOf(nx).n + (isPre(nx) ? " &middot; before session 1" : "") + '</div>' +
         '<h3>' + esc(nx.name) + '</h3><p>' + esc(nx.blurb) + '</p>' +
         '<button class="btn" onclick="__sfmGo(\'' + nx.id + '\')">' + (formLoad(nx.id) ? "Pick up where you left off" : "Start") + ' &rarr;</button></div>'
     : '<div class="hub-next"><div class="k">You are up to date</div><h3>Every step is done.</h3>' +
@@ -3914,7 +3951,7 @@ function renderHub() {
     return '<div class="step ' + state + '">' +
       '<div class="step-head"><span class="step-num">' + (complete ? "&#10003;" : st.n) + '</span>' +
         '<span class="step-title">' + st.title + '</span>' +
-        '<span class="step-tag' + (st.required ? " req" : "") + '">' + (st.required ? "Required" : "Optional") + ' &middot; ' + d + '/' + list.length + '</span></div>' +
+        '<span class="step-tag' + (list.some(isPre) ? " req" : "") + '">' + (list.every(isPre) ? "Before session 1 &middot; " : list.some(isPre) ? "" : "Optional &middot; ") + d + '/' + list.length + '</span></div>' +
       '<p class="step-lede">' + st.lede + '</p>' +
       (state === "later" ? '<p class="step-note">Best after step ' + current.n + '.</p>' : '') +
       list.map(function (q) { return qCard(q, done, snaps, nx); }).join("") +
@@ -3931,11 +3968,11 @@ renderNextSteps = function () {
   var host = document.getElementById("thanksActions");
   var done = doneMap();
   if (host && !document.getElementById("thanksReq")) {
-    var req = ["finder", "health", "consult"].filter(function (id) { return !done[id]; });
+    var req = ["health", "consult"].filter(function (id) { return !done[id]; });
     req.forEach(function (id, i) {
       var q = qInfo(id);
       host.insertBefore(el('<button class="btn sfm-next" style="margin-bottom:8px"' + (i === req.length - 1 ? ' id="thanksReq"' : '') +
-        ' onclick="__sfmGo(\'' + id + '\')">Required: ' + q.name + ' &rarr;</button>'), host.firstChild);
+        ' onclick="__sfmGo(\'' + id + '\')">Before session 1: ' + q.name + ' &rarr;</button>'), host.firstChild);
     });
   }
   if (host && !document.getElementById("thanksHub")) host.appendChild(el(
