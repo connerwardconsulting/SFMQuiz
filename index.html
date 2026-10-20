@@ -479,6 +479,9 @@ details{color:var(--text-secondary)}
 .screen.active .intro h1,.screen.active .hub-title{animation:sfTitle .8s cubic-bezier(.2,.7,.2,1) backwards}
 
 @media (prefers-reduced-motion:reduce){.sr.sr-wait{opacity:1;transform:none}#sfScroll{display:none}}
+/* question plates hug their content; the space below only clears the fixed button bar */
+.qwrap{flex:0 0 auto!important;padding-bottom:18px!important;margin-bottom:104px!important;border-radius:28px!important}
+#fErr:empty{min-height:0!important}
 
 </style>
 </head>
@@ -504,7 +507,7 @@ details{color:var(--text-secondary)}
     <div class="qwrap" style="padding-bottom:40px">
       <div class="eyebrow">Before we begin</div>
       <h2 class="sec-title">What brought you to<br>The Smart Fit Method?</h2>
-      <p class="sec-sub">Pick any that apply. They shape your consult and your plan, and you can refine them later.</p>
+      <p class="sec-sub">Pick any that apply. They shape your program and how we coach you, and you can refine them with your trainer any time.</p>
       <div id="goalList" style="margin-top:6px"></div>
       <button class="btn" id="goalContinue" disabled onclick="goalContinue()" style="margin-top:6px">Continue</button>
       <div class="resume-note">You can stop at any point and pick up where you left off. Do the whole thing in one sitting, or a few sections at a time. Your answers save as you go.</div>
