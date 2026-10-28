@@ -2372,7 +2372,14 @@ function startForm(spec) {
   var b = document.getElementById("fStart");
   if (b && saved && saved.a && Object.keys(saved.a).length) b.textContent = "Pick up where you left off";
   /* Arriving from the Consultation Screen: straight into the questions. */
-  if (qs.get("go") === "1" && spec.id === "health") setTimeout(function () { window.__fStart(); }, 0);
+  /* Only straight after the Consultation Screen, and only once: a refresh,
+     a reopened tab or a later visit to the same link never restarts it. */
+  if (qs.get("go") === "1") {
+    try { var u = new URL(location.href); u.searchParams.delete("go"); history.replaceState(null, "", u.pathname + u.search); } catch (e) {}
+    var dm = doneMap(), fresh = dm.consult && (Date.now() - Date.parse(dm.consult)) < 6 * 3600e3;
+    var already = dm.health && Date.parse(dm.health) >= Date.parse(dm.consult || 0);
+    if (spec.id === "health" && fresh && !already) setTimeout(function () { window.__fStart(); }, 0);
+  }
 }
 
 /* ---- one sitting before session 1 ------------------------------------
@@ -2441,7 +2448,7 @@ function renderForm() {
   document.getElementById("fProg").style.width = Math.round(100 * (cc.pos - 1) / cc.total) + "%";
   document.getElementById("fEyebrow").textContent = s.eyebrow || (s.required ? "For your safety" : "");
   document.getElementById("fTitle").innerHTML = s.title || "";
-  document.getElementById("fSub").innerHTML = s.sub || "";
+  document.getElementById("fSub").innerHTML = (typeof s.sub === "function" ? s.sub(c) : s.sub) || "";
   document.getElementById("fErr").textContent = "";
   document.getElementById("fHeads").innerHTML = s.heads
     ? '<div class="pref-note" style="margin:0 0 16px">' + s.heads +
@@ -2520,6 +2527,7 @@ function renderQ(q, s, c) {
       : '<input class="opt fIn" data-k="' + q.key + '" type="' + type + '" style="cursor:text" ' +
         (t === "number" ? 'inputmode="decimal" ' : '') + 'maxlength="120" placeholder="' + esc(q.ph || "") + '" value="' + esc(v == null ? "" : v) + '">';
   }
+  if (q.yesNote && v === "yes") body += '<div class="pref-note" style="margin:12px 0 0;border-left:3px solid var(--orange)">' + q.yesNote + '</div>';
   return '<div class="pref-q" id="q_' + q.key + '">' + head + body + '</div>';
 }
 function sliderHtml(key, v, mn, mx, lo, hi) {
@@ -2818,7 +2826,7 @@ var STUDIO_OPTS = STUDIOS.map(function (s) { return [s[0], s[1]]; });
    Health and Readiness while it is under 90 days old. */
 function safetyQs() {
   return [
-    { key: "par_symptom", type: "yesno", required: true, shared: true, fresh: 90, short: "Chest pain or fainting with exercise",
+    { key: "par_symptom", type: "yesno", required: true, shared: true, fresh: 90, short: "Chest pain or fainting with exercise", yesNote: "Thank you for telling us. Your Master Trainer will reach out before your next session, and your VO2max test waits for your physician's go-ahead. If you have chest pain, fainting or severe breathlessness right now, call 911.", 
       text: "In the last 12 months, have you had chest pain, fainting, dizziness or unexplained breathlessness during or after exercise?" },
     { key: "par_supervised", type: "yesno", required: true, shared: true, fresh: 90, short: "Physician limits on exercise",
       text: "Has a physician given you a reason not to do challenging exercise, or told you to exercise only under medical supervision?" },
@@ -2841,8 +2849,10 @@ function safetyQs() {
     { key: "recent_surgery_type", type: "multi", shared: true, fresh: 90, short: "Kind of surgery",
       text: "What kind?", when: function (c) { var v = c.v("recent_surgery"); return v === "lt3" || v === "3to12"; },
       opts: [["joint", "Joint or bone"], ["heart", "Heart or vascular"], ["abdominal", "Abdominal"], ["eye", "Eye"], ["spine", "Back or spine"], ["other", "Other"]] },
-    /* Pregnancy is never stored as a standing answer: asked fresh every time. */
-    { key: "preg_now", type: "yesno", required: true,
+    /* Pregnancy is never a standing answer. It is kept for one day only, so
+       Health and Readiness does not re-ask it straight after the Consultation
+       Screen; every later quiz asks it fresh. */
+    { key: "preg_now", type: "yesno", required: true, shared: true, fresh: 1, short: "Pregnant or within 12 months of birth",
       text: "Are you pregnant or within 12 months of giving birth?",
       when: function (c) { return c.female && (c.age == null || (c.age >= 18 && c.age <= 50)); } }
   ];
@@ -2885,6 +2895,8 @@ function hasSafetyHold(c) { return c.v("par_symptom") === "yes" || c.v("par_supe
    member record reads the same at every studio; the member only sees
    "recovery sessions". */
 var MODS = { boots: "Compression boots", shiftwave: "Shiftwave", h2: "Hydrogen inhalation" };
+function recoveryNames(c) { var n = [c.kit.indexOf("boots") >= 0 ? "Compression" : null, c.kit.indexOf("shiftwave") >= 0 ? "Shiftwave" : null, c.kit.indexOf("h2") >= 0 ? "hydrogen" : null].filter(Boolean);
+  return n.length > 1 ? n.slice(0, -1).join(", ") + " and " + n[n.length - 1] : (n[0] || "Recovery"); }
 function recoveryStatus(c) {
   var imp = (c.v("implants") || []), elec = imp.indexOf("pacemaker") >= 0 || imp.indexOf("device") >= 0;
   var preg = c.a.preg_now === "yes";
@@ -3078,12 +3090,13 @@ FORMS.health = {
                ["impact", "Running or jumping"], ["twist", "Twisting under load"], ["strain", "Breath-holding or straining"], ["other", "Other"]] }
     ] },
     { title: "Before your recovery sessions",
-      sub: "Compression, Shiftwave and hydrogen are part of your membership. Tick anything that applies. If nothing does, leave it blank.",
+      sub: function (c) { var n = recoveryNames(c); return n + (n.indexOf(" and ") >= 0 ? " are" : " is") + " part of your membership. Tick anything that applies. If nothing does, leave it blank."; },
       questions: [
         { key: "rl_flags", type: "multi", shared: true, fresh: 90, short: "Recovery checks", text: "Do any of these apply to you?", sub: "Leave blank if none do.",
-          opts: [["clot", "A blood clot in my legs or lungs, ever"], ["legs", "An open wound, skin infection or surgery on my legs in the last 3 months"],
-                 ["nocompress", "A physician has told me to avoid compression on my legs"], ["novibe", "A physician has told me to avoid vibration or pressure-wave devices"],
-                 ["lung", "A lung condition that needs supplemental oxygen, or I have been told to avoid inhaled therapies"]] }
+          opts: function (c) { var k = c.kit; return [["clot", "A blood clot in my legs or lungs, ever", "boots"], ["legs", "An open wound, skin infection or surgery on my legs in the last 3 months", "boots"],
+                 ["nocompress", "A physician has told me to avoid compression on my legs", "boots"], ["novibe", "A physician has told me to avoid vibration or pressure-wave devices", "shiftwave"],
+                 ["lung", "A lung condition that needs supplemental oxygen, or I have been told to avoid inhaled therapies", "h2"]]
+                 .filter(function (o) { return k.indexOf(o[2]) >= 0; }).map(function (o) { return [o[0], o[1]]; }); } }
       ] },
     { title: "Your physician", questions: [
       { key: "md_name", type: "text", shared: true, short: "Physician", text: "Your physician's name and practice", ph: "Optional" },
@@ -3100,7 +3113,7 @@ FORMS.health = {
     var next = ["<b>Program Finder</b>: shapes your plan and your week for session 2. It comes to you the night of session 1."];
     if (c.glp1) { flags.push("UNLOCK_GLP1"); next.push("<b>GLP-1 Muscle Protection</b>: builds muscle protection into your program before session 2."); }
     if (c.has("dx", "low_bone") || c.v("fracture40") === "yes") { flags.push("OFFER_BONES"); next.push("<b>Bones and Balance</b>: builds your bone and balance work into your program before session 2, with your physician in the loop."); }
-    var rs = recoveryStatus(c), held = Object.keys(rs).filter(function (m) { return rs[m] === "check"; });
+    var rs = recoveryStatus(c), held = Object.keys(rs).filter(function (m) { return rs[m] === "check" && c.kit.indexOf(m) >= 0; });
     if (held.length) { lines.push("<b>Recovery sessions:</b> your trainer checks one or two things with you before your first one. Everything else is ready."); held.forEach(function (m) { flags.push("RECOVERY_CHECK: " + MODS[m]); }); }
     else lines.push("<b>Recovery sessions:</b> cleared. Book them from day one.");
     if (!lines.length) lines.push("Nothing here changes how we start. Your trainer has it before your first session.");
@@ -3622,7 +3635,8 @@ FORMS.supplements = {
   screens: [
     { title: "Your goals", questions: [
       { key: "goal_primary", type: "single", shared: true, fresh: 120, short: "Main goal", text: "Your main goal", opts: GOAL_OPTS },
-      { key: "s_golf", type: "yesno", text: "Do you play golf?", when: function (c) { return !(c.v("activities") || []).some(function (x) { return x === "Golf"; }) && !picked(c, "Golf"); } }
+      { key: "activities", type: "multi", shared: true, short: "Activities", text: "What do you do outside the studio?",
+        opts: ["Tennis", "Golf", "Pickleball", "Skiing or snowboarding", "Cycling", "Walking", "Running", "Rucking", "Hiking", "Playing with kids or grandkids", "Travel", "Other"] }
     ] },
     { title: "Your week", questions: [
       { key: "train_days", type: "single", shared: true, fresh: 90, short: "Training days", text: "Training days a week, studio and outside", opts: [[1, "1"], [2, "2"], [3, "3"], [4, "4"], [5, "5 or more"]] },
@@ -3636,14 +3650,14 @@ FORMS.supplements = {
       { key: "sleep_q", type: "scale15", shared: true, fresh: 90, short: "Sleep quality", text: "Sleep quality", lo: "Poor", hi: "Excellent" },
       { key: "s_appetite", type: "yesno", text: "Is eating enough a struggle?" },
       { key: "s_detrained", type: "yesno", text: "Back to training after 3 or more months off or an injury?" },
-      { key: "s_joint", type: "yesno", text: "Any tendon or joint niggles?" }
+      { key: "s_joint", type: "yesno", text: "Any tendon or ligament injuries, dysfunction or discomfort?" }
     ] },
     { title: "Already taking", questions: [
       { key: "taking", type: "multi", shared: true, fresh: 90, confirm: true, short: "Supplements", text: "What do you take now?", sub: "Tap all. We never recommend what you already have.", opts: TAKING }
     ] },
     { title: "Has your physician told you...", required: true, sub: "So we only recommend what is right for you.",
       questions: [
-        { key: "s_preg", type: "yesno", required: true, text: "Are you pregnant, nursing or planning to be?", when: function (c) { return !c.male; } },
+        { key: "s_preg", type: "yesno", required: true, text: "Are you pregnant, nursing or planning to be?", when: function (c) { return !c.male; }, derive: function (c) { return c.v("preg_now") === "yes" ? "yes" : undefined; } },
         rxq("s_thinner", "Do you take a blood thinner?", "meds", "thinner"),
         rxq("s_kidney", "Have you been told to limit protein or watch your kidney function?", "dx", "kidney"),
         rxq("s_thyroid", "Thyroid medication?", "meds", "thyroid"),
@@ -3703,7 +3717,7 @@ FORMS.pulse = {
   lede: "Four minutes before every Check. Only what moves: sleep, stress, medications, your goal. Your re-test and your next block fit where you are now.",
   screens: [
     { title: "Since your last Check", required: true, questions: [
-      { key: "par_symptom", type: "yesno", required: true, shared: true, fresh: 0, alwaysAsk: true,
+      { key: "par_symptom", type: "yesno", required: true, shared: true, fresh: 0, alwaysAsk: true, yesNote: "Thank you for telling us. Your Master Trainer will reach out before your next session, and your VO2max test waits for your physician's go-ahead. If you have chest pain, fainting or severe breathlessness right now, call 911.", 
         text: "Since your last Check, have you had chest pain, fainting or dizziness during or after exercise?" },
       { key: "pu_meds_changed", type: "yesno", required: true, text: "Any change to your medications?" },
       { key: "meds", type: "multi", shared: true, confirm: true, none: "none", short: "Medications", text: "Which do you take now?", opts: MED_OPTS,
