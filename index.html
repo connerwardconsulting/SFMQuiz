@@ -418,6 +418,26 @@ details{color:var(--text-secondary)}
 .qwrap{flex:0 0 auto!important;padding-bottom:18px!important;margin-bottom:104px!important;border-radius:28px!important}
 #fErr:empty{min-height:0!important}
 
+
+/* hub accordion (4 Nov) */
+details.step>summary{list-style:none;cursor:pointer}
+details.step>summary::-webkit-details-marker{display:none}
+details.step>summary .step-head{padding:6px 0}
+details.step .step-chev{width:10px;height:10px;border-right:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:rotate(45deg);margin:0 4px 4px 4px;transition:transform .15s}
+details.step[open] .step-chev{transform:rotate(-135deg);margin-bottom:-4px}
+.step.complete{margin-top:18px}
+.step.complete .step-title{font-size:18px;color:var(--text-secondary)}
+.qrow{display:flex;align-items:center;gap:10px;margin:0 0 8px 46px;padding:11px 14px;border-radius:14px;background:var(--surface-raised);border:1px solid var(--border-subtle);text-decoration:none;color:var(--text-primary)}
+.qrow .ck{color:var(--tech-green-dark)}
+.qrow .nm{font-size:15px;font-weight:500}
+.qrow .dt{font-family:var(--font-mono);font-size:12px;color:var(--text-muted)}
+.qrow .go{margin-left:auto;font-size:13px;color:var(--text-muted)}
+.hub-more{background:none;border:0;padding:0;margin-top:10px;font:inherit;font-size:14px;color:var(--text-muted);text-decoration:underline;cursor:pointer}
+.hub-links{margin-top:40px;border-top:1px solid var(--border-subtle);padding-top:18px;font-size:13px}
+.hub-links h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.hub-links .lk{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-subtle)}
+.hub-links code{font-family:var(--font-mono);font-size:11.5px;color:var(--text-secondary);word-break:break-all;flex:1}
+.hub-links button{font:inherit;font-size:12px;border:1px solid var(--border-strong);background:transparent;color:var(--text-primary);border-radius:6px;padding:3px 8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -3942,9 +3962,19 @@ function mountHub() {
     '</div></section>'));
 }
 
+/* ?step=<id> shows one step on its own, for sending one part of the journey. */
+var INTRO_KEY = "sfm_hub_intro_seen";
+var ONLY_STEP = (function () { var v = (qs.get("step") || "").toLowerCase(); return STEPS.some(function (s) { return s.id === v; }) ? v : ""; })();
+var STAFF = qs.get("staff") === "1";
 function fmtDate(iso) { try { var d = new Date(iso); return MONTHS[d.getMonth()] + " " + d.getDate(); } catch (e) { return ""; } }
 
 function qCard(q, done, snaps, nx) {
+  if (done[q.id]) {
+    var sd = (snaps[q.id] || {}).at || done[q.id];
+    return '<a class="qrow" href="#" onclick="__sfmGo(\'' + q.id + '\');return false">' +
+      '<span class="ck">&#10003;</span><span class="nm">' + esc(q.name) + '</span>' +
+      '<span class="dt">' + fmtDate(sd) + '</span><span class="go">Retake &rarr;</span></a>';
+  }
   var started = !!formLoad(q.id), isDone = !!done[q.id], s = snaps[q.id] || {}, ins = s.insights || [];
   var req = isPre(q);
   var chip = isDone ? '<span class="chip done">Done</span>'
@@ -3959,6 +3989,20 @@ function qCard(q, done, snaps, nx) {
     '<span class="go">' + (isDone ? "Retake" : started ? "Continue" : "Start") + ' &rarr;</span></div></a>';
 }
 
+/* ?staff=1 lists the shareable link for every quiz and step. Links carry no
+   member details; add &n=, &e= and &s= per member in the message automation. */
+function staffLinks() {
+  var base = location.origin + location.pathname, row = function (label, url) {
+    return '<div class="lk"><span style="min-width:170px">' + label + '</span><code>' + esc(url) + '</code>' +
+      '<button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + url + '\');this.textContent=\'Copied\'">Copy</button></div>';
+  };
+  return '<div class="hub-links"><h4>Quiz links</h4>' +
+    QUIZZES.map(function (q) { return row(esc(q.name), base + '?q=' + q.id); }).join("") +
+    '<h4 style="margin-top:18px">Step links</h4>' +
+    STEPS.map(function (st) { return row('Step ' + st.n + ': ' + st.title, base + '?step=' + st.id); }).join("") +
+    row('Everything', base) + '</div>';
+}
+
 function renderHub() {
   var c = makeCtx({}), done = doneMap(), snaps = snapshots(), order = routeOrder(c);
   var shown = QUIZZES.filter(function (q) { return eligibleQ(q, c); });
@@ -3966,7 +4010,22 @@ function renderHub() {
   var reqDone = req.filter(function (q) { return done[q.id]; }).length;
   var nDone = shown.filter(function (q) { return done[q.id]; }).length;
   document.getElementById("hubHello").textContent = member.name ? "Hello " + member.name.split(" ")[0] : "Your profile";
-  document.getElementById("hubLede").innerHTML = reqDone < req.length
+  var FULL_INTRO = 'Welcome to The Smart Fit Method&trade;. Complete the <b>Consultation Screen</b> and <b>Health and Readiness</b> before your first session, ' +
+      'about 8 minutes together, so session 1 is built around you.<br><br>' +
+      'After session 1, the <b>Program Finder</b> shapes your plan and your week for session 2. ' +
+      'Through your first month, one short quiz a week further personalizes your program and enhances your results. ' +
+      'Everything stays open here if you would like to move faster, and your answers save as you go.';
+  var seenIntro = false; try { seenIntro = !!localStorage.getItem(INTRO_KEY); } catch (e) {}
+  var shortLede = reqDone < req.length
+    ? 'Start with the <b>Consultation Screen</b> and <b>Health and Readiness</b>, about 8 minutes together, before session 1.'
+    : !done.finder
+      ? 'You are ready for session 1. Next comes the <b>Program Finder</b>, which shapes your plan and your week for session 2.'
+      : 'Your plan and your week are set. Each quiz from here further personalizes your program and enhances your results.';
+  document.getElementById("hubLede").innerHTML = (!seenIntro && reqDone < req.length) ? FULL_INTRO
+    : shortLede + (reqDone < req.length ? '<br><button class="hub-more" type="button" onclick="__sfmIntro(this)">How this works</button>' : '');
+  window.__sfmIntro = function (b) { b.parentNode.innerHTML = FULL_INTRO; };
+  try { localStorage.setItem(INTRO_KEY, "1"); } catch (e) {}
+  if (false) document.getElementById("hubLede").innerHTML = reqDone < req.length
     ? 'Welcome to The Smart Fit Method&trade;. Complete the <b>Consultation Screen</b> and <b>Health and Readiness</b> before your first session, ' +
       'about 8 minutes together, so session 1 is built around you.<br><br>' +
       'After session 1, the <b>Program Finder</b> shapes your plan and your week for session 2. ' +
@@ -3981,6 +4040,7 @@ function renderHub() {
     '<div class="bar"><i style="width:' + pct + '%"></i></div>';
 
   var nx = nextUp(1, c)[0];
+  if (ONLY_STEP) nx = nextUp(20, c).filter(function (q) { return q.step === ONLY_STEP; })[0];
   document.getElementById("hubNext").innerHTML = nx
     ? '<div class="hub-next"><div class="k">Next up &middot; step ' + stepOf(nx).n + (isPre(nx) ? " &middot; before session 1" : "") + '</div>' +
         '<h3>' + esc(nx.name) + '</h3><p>' + esc(nx.blurb) + '</p>' +
@@ -3998,15 +4058,25 @@ function renderHub() {
     var d = list.filter(function (q) { return done[q.id]; }).length, complete = d === list.length;
     var state = complete ? "complete" : (current ? "later" : "current");
     if (!complete && !current) current = st;
-    return '<div class="step ' + state + '">' +
+    if (ONLY_STEP && st.id !== ONLY_STEP) return "";
+    /* Accordion: only the step she is on opens by itself. Done and later steps fold
+       to one line; tap to open. A step sent on its own (?step=) always opens. */
+    var open = state === "current" || ONLY_STEP === st.id;
+    var tag = complete ? d + ' of ' + list.length + ' done'
+      : (list.every(isPre) ? "Before session 1 &middot; " : list.some(isPre) ? "" : "Optional &middot; ") + d + '/' + list.length;
+    var pending = list.filter(function (q) { return !done[q.id]; }), finished = list.filter(function (q) { return done[q.id]; });
+    return '<details class="step ' + state + '"' + (open ? ' open' : '') + '><summary>' +
       '<div class="step-head"><span class="step-num">' + (complete ? "&#10003;" : st.n) + '</span>' +
         '<span class="step-title">' + st.title + '</span>' +
-        '<span class="step-tag' + (list.some(isPre) ? " req" : "") + '">' + (list.every(isPre) ? "Before session 1 &middot; " : list.some(isPre) ? "" : "Optional &middot; ") + d + '/' + list.length + '</span></div>' +
-      '<p class="step-lede">' + st.lede + '</p>' +
-      (state === "later" ? '<p class="step-note">Best after step ' + current.n + '.</p>' : '') +
-      list.map(function (q) { return qCard(q, done, snaps, nx); }).join("") +
-    '</div>';
+        '<span class="step-tag' + (!complete && list.some(isPre) ? " req" : "") + '">' + tag + '</span><span class="step-chev"></span></div></summary>' +
+      (complete ? '' : '<p class="step-lede">' + st.lede + '</p>') +
+      (state === "later" && current ? '<p class="step-note">Best after step ' + current.n + '.</p>' : '') +
+      pending.map(function (q) { return qCard(q, done, snaps, nx); }).join("") +
+      finished.map(function (q) { return qCard(q, done, snaps, nx); }).join("") +
+    '</details>';
   }).join("");
+  if (ONLY_STEP) html += '<p style="margin:28px 0 0 46px"><a href="' + hubUrl() + '" style="color:var(--text-muted);font-size:14px;text-decoration:underline">See all your quizzes</a></p>';
+  if (STAFF) html += staffLinks();
   document.getElementById("hubList").innerHTML = html;
 }
 
