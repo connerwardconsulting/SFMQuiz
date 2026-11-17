@@ -1282,9 +1282,9 @@ var INTRO = {
                lede: "Optional, about four minutes. The daily habits that move body composition most, so your trainer can focus on the ones that matter for you." },
   lifestyle: { eyebrow: "Lifestyle Profile",
                lede: "See which of your daily habits are helping and which are holding your results back: sleep, stress, movement, recovery, mindset. Then tell us how you want to hear from us." },
-  food:      { eyebrow: "Food Picker",
+  food:      { eyebrow: "Nutrition Profile",
                lede: "Food swaps built only from foods you like, each one moving you toward your protein target. Five minutes: what you like to eat, then how your week really runs." },
-  deepdive:  { eyebrow: "Deep Dive",
+  deepdive:  { eyebrow: "Full Review",
                lede: "Every detail behind your habits, for when you want the full picture: hydration, food, movement, sleep, stress, purpose, your kitchen and your home. Optional, about fifteen minutes, and every answer sharpens your program." },
   hub:       { eyebrow: "Your profile", lede: "Your quizzes and what they found." },
   longevity: { eyebrow: "Lifestyle Assessment",
@@ -1351,7 +1351,7 @@ var QUIZZES = [
   { id: "fatloss",   name: "Body Composition Plan", need: "Required", mins: "About 4 minutes",
     blurb: "The thirty-seven things that actually move body composition. Where your habits are working against the result you want.",
     ready: true },
-  { id: "food",      name: "Food Picker", need: "Required", mins: "About 5 minutes",
+  { id: "food",      name: "Nutrition Profile", need: "Required", mins: "About 5 minutes",
     blurb: "Everything you will and will not eat, plus how your week actually runs. Nothing goes into your plan that you did not pick.",
     ready: true },
   { id: "lifestyle", name: "Lifestyle + Personalization", need: "Completes your profile", mins: "About 5 minutes",
@@ -2658,7 +2658,7 @@ function updateNextBtn() {
   var req = missingRequired().length;
   b.disabled = false;
   if (wasOff) { b.classList.remove("ready"); void b.offsetWidth; b.classList.add("ready"); }
-  b.textContent = req ? "Please answer the safety questions" :
+  b.textContent = req ? (F.spec && F.spec.id === "finder" ? "Please answer the question above" : "Please answer the safety questions") :
     (last ? (F.spec.finishLabel || "See my results") : (!s.info && !screenAnswered() ? "Skip this screen" : "Next"));
   b.style.opacity = req ? ".55" : "1";
 }
@@ -2728,6 +2728,9 @@ function finishForm() {
     startedAt: F.started, updatedAt: new Date().toISOString()
   });
   renderResult(spec, r);
+  /* Goals and Readiness is one quiz to the member and two records underneath.
+     Part 1 (goals, safety screen, waiver) is saved above; part 2 opens by itself. */
+  if (spec.id === "consult" && r.next === "health") setTimeout(function () { __sfmGo("health", 1); }, 1400);
 }
 
 function renderResult(spec, r) {
@@ -2931,10 +2934,10 @@ var FORMS = {};
 
 /* ---------------- #1 CONSULTATION SCREEN ---------------- */
 FORMS.consult = {
-  id: "consult", num: 1, name: "Consultation Screen", short: "Consultation", version: "SFM Consultation Screen v1.1",
-  mins: "About 3 minutes, then Health and Readiness: about 8 minutes in all", consent: true, consentInline: true, safetyNote: true,
+  id: "consult", num: 1, name: "Goals and Readiness", short: "Goals and Readiness", version: "SFM Consultation Screen v1.1",
+  mins: "About 8 minutes", consent: true, consentInline: true, safetyNote: true,
   title: "Make your first<br>session count.",
-  lede: "Take 3 minutes to customize your first session based on your goals. You finish it with a summary and analysis of your strengths and the areas we will improve first, and session 2 builds straight from it.",
+  lede: "Take about 8 minutes to customize your first session based on your goals and your health. You finish it with a summary and analysis of your strengths and the areas we will improve first, and session 2 builds straight from it.",
   screens: [
     { title: "About you", questions: [
       { key: "name", type: "text", shared: true, short: "Name", text: "Your name", ph: "First and last name" },
@@ -3030,9 +3033,9 @@ FORMS.consult = {
         ? "Grip, sit-to-stand and balance, printed against your age. It shows what the scale cannot, and it takes five minutes at the studio."
         : "A strength session and three quick measurements. You finish with your strengths and the areas we will improve first, and session 2 builds from there.",
       blocks: blocks, flags: flags, team: team,
-      next: doneMap().health ? undefined : "health", nextGo: true, nextLabel: doneMap().health ? undefined : "Continue to Health and Readiness",
+      next: doneMap().health ? undefined : "health", nextGo: true, nextLabel: doneMap().health ? undefined : "Continue",
       noHub: !doneMap().health,
-      thanks: doneMap().health ? undefined : "Thank you. One more step, about 5 minutes, and session 1 is built around you.",
+      thanks: doneMap().health ? undefined : "Saved. Your health and readiness questions come next, about 5 minutes.",
       buttons: [].concat(BOOKING_URL ? [{ label: "Book session 1", href: BOOKING_URL }] : [])
                  .concat(hsa && TRUEMED_URL ? [{ label: "Start the Truemed letter", href: TRUEMED_URL }] : []),
       insights: [scaleOnly ? "Next: the five-minute read at the studio." : "Next: session 1. Wear fitted clothing and come hydrated."]
@@ -3064,7 +3067,7 @@ function TESTED_6M(c) {
   return o.concat([["unsure", "Not sure"]]);
 }
 FORMS.health = {
-  id: "health", num: 2, name: "Health and Readiness", short: "Health", version: "SFM Health and Readiness v1.0",
+  id: "health", num: 2, name: "Goals and Readiness", short: "Goals and Readiness", version: "SFM Health and Readiness v1.0",
   mins: "About 5 minutes", consent: true, safetyNote: true,
   title: "Train hard<br>from day one.",
   lede: "Five minutes clears you for strength, conditioning, testing and recovery, all at once.",
@@ -3154,7 +3157,7 @@ FORMS.health = {
       lede: "Your trainer has everything they need for your first session.",
       blocks: [{ title: "What happens next", lines: lines }, { title: "Your blood work", lines: rec }, { title: "After session 1", lines: next }],
       flags: flags, recovery: rs,
-      team: ["Health and Readiness complete"].concat(flags.length ? ["Safety: " + flags.length + " item(s) for the coach, see the member record"] : [])
+      team: ["Goals and Readiness complete (health part)"].concat(flags.length ? ["Safety: " + flags.length + " item(s) for the coach, see the member record"] : [])
         .concat(noTests ? ["Blood work: none in the last 6 months, offer the blood panel"] : c.any("tested_6m") ? ["Tested in the last 6 months: " + labelOf(qByKey("tested_6m"), c.v("tested_6m"), c)] : []),
       insights: [hasSafetyHold(c) ? "Bring physician clearance before your VO2max test." : "Cleared to train and test. Reconfirmed every 90 days.",
                  held.length ? "Recovery sessions: your trainer checks first." : "Recovery sessions: cleared."]
@@ -3169,17 +3172,19 @@ var GOAL_OPTS = function (c) {
   var o = [["G_LEAN", "Build or keep muscle"], ["G_BODYCOMP", "More muscle, less fat"]];
   if (c.atLeast(50) || c.has("dx", "low_bone") || c.v("fracture40") === "yes") o.push(["G_BONE", "Protect my bones and balance"]);
   if (c.glp1) o.push(["G_GLP1", "Keep my muscle while on a GLP-1"]);
+  if (c.female) o.push(["G_WOMEN", "Training built for women\u2019s health"]);
   return o.concat([["G_RECOVER", "Recover faster and sleep deeper"], ["G_TRAIN", "Train for a sport or activity"],
     ["G_HEART", "Heart and metabolic health"], ["G_MOVE", "Move more easily and feel steadier"], ["G_INJURY", "Recover from or prevent an injury"]]);
 };
+function sportOn(c) { return c.v("goal_primary") === "G_TRAIN" || c.v("sport_focus") === "yes"; }
 FORMS.finder = {
-  id: "finder", num: 3, name: "Program Finder", short: "Program Finder", version: "SFM Program Finder v1.1",
+  id: "finder", num: 3, name: "Program Finder", short: "Program Finder", version: "SFM Program Finder v1.2",
   mins: "About 4 minutes", consent: false,
   title: "A program built<br>around you.",
   lede: "Tell us your goals, what to prioritize, how you like to be coached, and what your schedule looks like so we can personalize your experience and exceed your expectations.",
   screens: [
     { title: "Your goal", questions: [
-      { key: "goal_primary", type: "single", shared: true, fresh: 120, short: "Main goal", text: "What matters most for your first 90 days?", opts: GOAL_OPTS },
+      { key: "goal_primary", type: "single", required: true, shared: true, fresh: 120, short: "Main goal", text: "What matters most for your first 90 days?", opts: GOAL_OPTS },
       { key: "goal_secondary", type: "single", shared: true, fresh: 120, short: "Second goal", text: "Anything else?", sub: "One, optional.",
         opts: function (c) { return GOAL_OPTS(c).filter(function (o) { return o[0] !== c.v("goal_primary"); }); } },
       { key: "start_point", type: "single", shared: true, short: "Where you are starting", text: "Where are you starting from?",
@@ -3188,6 +3193,21 @@ FORMS.finder = {
       { key: "barriers", type: "multi", shared: true, short: "What held you back", text: "What has held you back before?",
         opts: [["time", "Time"], ["accountability", "Motivation or accountability"], ["unsure", "Not sure what works for my body"],
                ["pain", "Injuries or pain"], ["inconsistent", "Inconsistency"]] }
+    ] },
+    { title: "Sport and performance", questions: [
+      { key: "sport_focus", type: "yesno", required: true, shared: true, fresh: 120, short: "Sport focus",
+        text: "Would you like your program to focus on sporting performance?", sub: "Golf, tennis, pickleball or another sport or activity.",
+        when: function (c) { return c.v("goal_primary") !== "G_TRAIN"; } },
+      { key: "train_sport", type: "single", shared: true, fresh: 120, short: "Sport", text: "Which sport are you training for?",
+        opts: [["golf", "Golf"], ["racket", "Tennis or pickleball"], ["other", "Something else"]], when: sportOn },
+      { key: "sport_priority", type: "single", required: true, shared: true, fresh: 120, short: "Goal or sport first",
+        text: "What is more important: achieving your health goal, sport performance, or both equally?",
+        opts: [["goal", "Achieving my health goal"], ["sport", "Sport performance"], ["both", "Both equally"]],
+        when: function (c) { return c.v("goal_primary") !== "G_TRAIN" && c.v("sport_focus") === "yes"; } },
+      { key: "perf_focus", type: "multi", max: 3, shared: true, fresh: 180, short: "What to build", text: "What would make the biggest difference?",
+        opts: [["power", "Power and speed"], ["rotation", "Power when you turn or swing (golf, tennis, pickleball)"], ["endurance", "Endurance"], ["balance", "Balance and stability"],
+               ["mobility", "Mobility"], ["strength", "Strength"], ["durable", "Holding up to injury"], ["recovery", "Recovering faster between sessions"]], when: sportOn },
+      { key: "perf_date", type: "date", shared: true, fresh: 180, short: "Event date", text: "Event or season date, if there is one", sub: "Optional.", when: sportOn }
     ] },
     { title: "How you like to train", sub: "Your trainer reads this before your next session.", questions: [
       { key: "coach_style", type: "single", shared: true, fresh: 180, short: "Coaching style", text: "During a session, how do you like to be coached?",
@@ -3277,7 +3297,7 @@ var SP_TESTS = [
 ];
 
 FORMS["starting-picture"] = {
-  id: "starting-picture", num: 7, name: "Starting Picture", short: "Starting Picture", version: "SFM Starting Picture v2.0",
+  id: "starting-picture", num: 7, name: "Vitality Profile", short: "Vitality Profile", version: "SFM Starting Picture v2.0",
   mins: "About 8 minutes", consent: true,
   title: "Feel better,<br>sooner.",
   lede: "Tell us how your body has been feeling and your trainer knows where to look in your numbers first. Answer what you want to answer.",
@@ -3397,7 +3417,7 @@ FORMS["starting-picture"] = {
       blocks: [{ title: "What you told us", lines: told }, { title: "Where to look in your results", lines: look },
                { title: "Worth asking your physician", lines: md }],
       flags: flags,
-      team: ["Starting Picture complete (" + (br ? { w_u40: "women under 40", w_40: "women 40+", m_u40: "men under 40", m_40: "men 40+" }[br] : "no branch") + ")",
+      team: ["Vitality Profile complete (" + (br ? { w_u40: "women under 40", w_40: "women 40+", m_u40: "men under 40", m_40: "men 40+" }[br] : "no branch") + ")",
              areas.length ? nStand + " area(s) stand out; details on the member record" : "Shared areas skipped"],
       insights: [nStand ? nStand + " area" + (nStand > 1 ? "s" : "") + " to look at in your results: " +
                   areas.filter(function (x) { return x.band === "Stands out"; }).map(function (x) { return x.ar.name; }).join(", ") + "."
@@ -3648,7 +3668,7 @@ function rxq(key, text, src, val) {
     derive: function (c) { var x = c.v(src); if (!Array.isArray(x)) return c.v(src + "_any") === "no" ? "no" : undefined; return x.indexOf(val) >= 0 ? "yes" : "no"; } };
 }
 FORMS.supplements = {
-  id: "supplements", num: 11, name: "Supplement Protocol", short: "Supplements", version: "SFM Supplement Protocol v1.0",
+  id: "supplements", num: 11, name: "Supplement Plan", short: "Supplements", version: "SFM Supplement Protocol v1.0",
   mins: "About 5 minutes", consent: true,
   title: "Stop guessing<br>at the shelf.",
   lede: "Five minutes. Only what your numbers call for, built around what you already take and reviewed by your trainer. Protein, electrolytes, creatine and HumaPro come from the studio; everything else comes through Fullscript.",
@@ -3721,7 +3741,7 @@ FORMS.supplements = {
       lede: "Up to four items, each one called for by your numbers and built around what you already take.",
       blocks: [{ title: "What happens next", lines: lines }, { title: "Already covered", lines: covered }],
       codes: codes, flags: stop ? ["S_PREG: no recommendations"] : (c.v("s_otherrx") === "yes" ? ["S_OTHERRX: physician footer"] : []),
-      team: ["Supplement Protocol inputs ready (" + codes.length + " codes)", stop ? "S_PREG: no recommendations" : "Build and review the protocol"],
+      team: ["Supplement Plan inputs ready (" + codes.length + " codes)", stop ? "S_PREG: no recommendations" : "Build and review the plan"],
       insights: [stop ? "No supplement recommendations for now." : "Your trainer is building your supplement protocol."]
         .concat(have.length ? ["Already covered: " + have.join(", ") + "."] : []),
       foot: "These statements have not been evaluated by the Food and Drug Administration. Re-checked at your next scan."
@@ -3731,7 +3751,7 @@ FORMS.supplements = {
 
 /* ---------------- #13 LONGEVITY CHECK PULSE ---------------- */
 FORMS.pulse = {
-  id: "pulse", num: 13, name: "Longevity Check Pulse", short: "Pulse", version: "SFM Longevity Check Pulse v1.0",
+  id: "pulse", num: 13, name: "Longevity Check-in", short: "Check-in", version: "SFM Longevity Check Pulse v1.0",
   mins: "About 4 minutes", consent: true, safetyNote: true,
   title: "Keep your next block<br>aimed at you.",
   lede: "Four minutes before every Check. Only what moves: sleep, stress, medications, your goal. Your re-test and your next block fit where you are now.",
@@ -3775,8 +3795,8 @@ FORMS.pulse = {
       if (now == null) return;
       if (before == null) { lines.push(name + ": " + now + " of 5."); return; }
       var d = now - before, word = d === 0 ? "unchanged" : ((d > 0) === higherBetter ? "better" : "worse");
-      lines.push(name + ": " + now + " of 5, " + word + (d ? " (" + (d > 0 ? "+" : "") + d + ")" : "") + " since your last Pulse.");
-      if (d) ins.push(name + " " + word + " since last Pulse.");
+      lines.push(name + ": " + now + " of 5, " + word + (d ? " (" + (d > 0 ? "+" : "") + d + ")" : "") + " since your last Check-in.");
+      if (d) ins.push(name + " " + word + " since last Check-in.");
     }
     delta("Sleep", c.n("sleep_q"), prev && prev.sleep, true);
     delta("Stress", a.pu_stress, prev && prev.stress, false);
@@ -3799,8 +3819,8 @@ FORMS.pulse = {
       blocks: [{ title: "Since last time", lines: lines }],
       flags: flags, gm: gm,
       profile: [["pulse_last", { sleep: c.n("sleep_q"), stress: a.pu_stress, energy: a.pu_energy, at: new Date().toISOString() }]],
-      team: ["Longevity Check Pulse complete"].concat(flags.length ? ["Coach: " + flags.length + " item(s) to review before the Check"] : []).concat(gm.length ? ["GM: " + gm.length + " item(s), see GM notes"] : []),
-      insights: ins.length ? ins : ["Pulse done. Ready for your Check."],
+      team: ["Longevity Check-in complete"].concat(flags.length ? ["Coach: " + flags.length + " item(s) to review before the Check"] : []).concat(gm.length ? ["GM: " + gm.length + " item(s), see GM notes"] : []),
+      insights: ins.length ? ins : ["Check-in done. Ready for your Check."],
       foot: ""
     };
   }
@@ -3819,19 +3839,17 @@ FORMS.pulse = {
 var PRODUCT_NAME = "SmartFit Personalization &amp; Optimization Quizzes";
 var STEPS = [
   { n: 1, id: "before", title: "Before your first session", required: true,
-    lede: "About 8 minutes in one sitting. Session 1 is built around what you tell us here." },
-  { n: 2, id: "start", title: "After session 1", required: false,
-    lede: "Shapes your plan and your week, so session 2 picks up right where session 1 ends." },
-  { n: 3, id: "personalize", title: "Personalize your program", required: false,
-    lede: "One a week through your first month. Each one tells us how you live, eat and feel, so your program fits your life and gets you there faster." },
-  { n: 4, id: "improve", title: "Enhance your results", required: false,
-    lede: "Take only the supplements your numbers call for, and keep every block aimed at where you are now." }
+    lede: "Goals and Readiness, about 8 minutes in one sitting. Session 1 is built around what you tell us here." },
+  { n: 2, id: "start", title: "Personalize your program", required: true,
+    lede: "After your first session. The Program Finder sets your program and your week, so session 2 picks up right where session 1 ends." },
+  { n: 3, id: "personalize", title: "Enhance your results", required: false,
+    lede: "One a week through your first month, then a short check-in before each Longevity Check. Each one tells us how you live, eat and feel, so your program keeps fitting your life and your numbers keep moving." }
 ];
 QUIZZES = [
-  { id: "consult", num: 1, step: "before", name: "Consultation Screen", mins: "3 min",
+  { id: "consult", num: 1, step: "before", name: "Goals and Readiness", mins: "8 min",
     fwd: "Builds session 1 around what you want to still be doing in twenty years.",
     blurb: "Walk in with your first session already built around what you want to still be doing in twenty years, and what has never been measured." },
-  { id: "health", num: 2, step: "before", name: "Health and Readiness", mins: "5 min",
+  { id: "health", num: 2, step: "before", name: "Goals and Readiness", mins: "5 min",
     fwd: "Clears you for strength, conditioning, testing and recovery from session 1.",
     blurb: "Train hard and test safely from your first session, with strength, conditioning and recovery all cleared at once." },
   { id: "finder", num: 3, step: "start", name: "Program Finder", mins: "4 min",
@@ -3851,26 +3869,23 @@ QUIZZES = [
   { id: "lifestyle", num: 4, step: "personalize", name: "Lifestyle Profile", mins: "5 min",
     fwd: "Shows which daily habits are moving your results, and how you like to hear from us.",
     blurb: "See which of your daily habits are helping and which are holding your results back, and choose how you want us to talk to you." },
-  { id: "starting-picture", num: 7, step: "personalize", name: "Starting Picture", mins: "8 min",
+  { id: "starting-picture", num: 7, step: "personalize", name: "Vitality Profile", mins: "8 min",
     fwd: "Tells your trainer where to look first in your numbers.",
     blurb: "Feel better sooner. Tell us how your body has been feeling and your trainer knows where to look in your numbers first." },
   { id: "fatloss", num: 5, step: "personalize", name: "Body Composition Plan", mins: "4 min",
     fwd: "Finds the one daily habit that moves your next scan most.",
     blurb: "The daily habits that decide what your next scan shows, and the one change your trainer will focus on with you." },
-  { id: "performance", num: 10, step: "personalize", name: "Performance Program", mins: "8 min",
-    fwd: "Builds your block around your sport or activity.",
-    blurb: "Play better, go longer and keep doing it for decades. Your block gets built around your sport, your event or your activity." },
-  { id: "food", num: 6, step: "personalize", name: "Food Picker", mins: "5 min",
+  { id: "food", num: 6, step: "personalize", name: "Nutrition Profile", mins: "5 min",
     fwd: "Food swaps built from foods you like, toward your protein target.",
     blurb: "Food swaps built only from foods you like, each one moving you toward your protein target, around the way your week really runs." },
-  { id: "supplements", num: 11, step: "improve", name: "Supplement Protocol", mins: "5 min",
+  { id: "supplements", num: 11, step: "personalize", name: "Supplement Plan", mins: "5 min",
     fwd: "Only what your numbers call for, reviewed by your trainer.",
     blurb: "Only what your numbers call for, reviewed by your trainer. Protein, electrolytes, creatine and HumaPro from the studio; everything else through Fullscript." },
-  { id: "pulse", num: 13, step: "improve", name: "Longevity Check Pulse", mins: "4 min",
+  { id: "pulse", num: 13, step: "personalize", name: "Longevity Check-in", mins: "4 min",
     fwd: "Keeps your next block aimed at where you are now.",
     blurb: "Four minutes before each Longevity Check, so your re-test and your next block fit where you are now.",
     eligible: function () { return pulseOpen(); } },
-  { id: "deepdive", num: 14, step: "improve", name: "Deep Dive", mins: "15 min",
+  { id: "deepdive", num: 14, step: "personalize", name: "Full Review", mins: "15 min",
     fwd: "Every detail behind your habits, for the full picture.",
     blurb: "For when you want the full picture: the finer detail on hydration, food, movement, sleep, stress, purpose, your kitchen and your home.",
     eligible: function () { var d = doneMap(); return !!(d.lifestyle || d.fatloss); } }
@@ -3880,6 +3895,8 @@ QUIZZES = [
    one sitting. Everything else is optional and stays open. */
 var PRE_SESSION = ["consult", "health"];
 function isPre(q) { return PRE_SESSION.indexOf(q.id) >= 0; }
+/* The Program Finder is required after session 1: it is how a member gets a program. */
+function isMust(q) { return q.id === "finder"; }
 /* The day of her membership each quiz is prompted by her trainer in month 1.
    Reference for the trainer schedule and automations; the hub itself stays open. */
 var PROMPT_DAYS = { lifestyle: 8, "starting-picture": 6, fatloss: 10, performance: 16, food: 20, supplements: 22 };
@@ -3923,7 +3940,7 @@ doneMap = function () {
   return d;
 };
 
-QUIZZES.forEach(function (q) { q.ready = true; q.need = isPre(q) ? "Required" : "Optional"; });
+QUIZZES.forEach(function (q) { q.ready = true; q.need = isPre(q) || isMust(q) ? "Required" : "Optional"; });
 function qInfo(id) { return QUIZZES.filter(function (q) { return q.id === id; })[0]; }
 function eligibleQ(q, c) { return !q.eligible || q.eligible(c); }
 function stepOf(q) { return STEPS.filter(function (s) { return s.id === q.step; })[0]; }
@@ -3934,8 +3951,7 @@ function routeOrder(c) {
   var sport = c.has("goal_primary", "G_TRAIN") || c.has("goal_secondary", "G_TRAIN") ||
     (c.v("activities") || []).filter(function (x) { return x !== "Walking" && x !== "Travel"; }).length > 0;
   var o = ["consult", "health", "finder", "glp1", "bones", "starting-picture", "lifestyle", "fatloss"];
-  if (sport) o.push("performance");
-  o.push("food", "supplements", "pulse", "performance", "deepdive");
+  o.push("food", "supplements", "pulse", "deepdive");
   var seen = {}; return o.filter(function (id) { if (seen[id]) return false; seen[id] = 1; return true; });
 }
 function nextUp(n, c) {
@@ -3953,7 +3969,7 @@ function mountHub() {
       '<div class="logo">THE SMART FIT METHOD</div>' +
       '<div class="eyebrow" id="hubHello" style="margin-top:32px"></div>' +
       '<h1 class="hub-title">' + PRODUCT_NAME + '</h1>' +
-      '<p class="hub-sub">Your program, in <span class="acc">four steps</span>.</p>' +
+      '<p class="hub-sub">Your program, in <span class="acc">three steps</span>.</p>' +
       '<p class="hub-lede" id="hubLede"></p>' +
       '<div class="hub-prog" id="hubProgress"></div>' +
       '<div id="hubNext"></div>' +
@@ -3964,8 +3980,45 @@ function mountHub() {
 
 /* ?step=<id> shows one step on its own, for sending one part of the journey. */
 var INTRO_KEY = "sfm_hub_intro_seen";
-var ONLY_STEP = (function () { var v = (qs.get("step") || "").toLowerCase(); return STEPS.some(function (s) { return s.id === v; }) ? v : ""; })();
+var ONLY_STEP = (function () { var v = (qs.get("step") || "").toLowerCase(); if (v === "improve") v = "personalize"; return STEPS.some(function (s) { return s.id === v; }) ? v : ""; })();
 var STAFF = qs.get("staff") === "1";
+/* Member code: step 3 opens with the code a trainer gives at sign-up.
+   A light lock: it lives in this page, so it stops wandering, nothing more.
+   Entered once per device. A link with &k=<code> opens it without typing.
+   A device that already has a step 3 or 4 quiz started or done stays open. */
+var MEMBER_CODE = "longevity";
+var LOCKED_STEPS = ["personalize"];
+var UNLOCK_KEY = "sfm_member_unlocked";
+function codeNorm(v) { return String(v || "").trim().toLowerCase(); }
+function memberUnlocked() {
+  try { if (localStorage.getItem(UNLOCK_KEY) === "1") return true; } catch (e) {}
+  if (codeNorm(qs.get("k")) === MEMBER_CODE) { try { localStorage.setItem(UNLOCK_KEY, "1"); } catch (e) {} return true; }
+  try {
+    var d = doneMap();
+    if (QUIZZES.some(function (q) { return LOCKED_STEPS.indexOf(q.step) >= 0 && (d[q.id] || formLoad(q.id)); })) return true;
+  } catch (e) {}
+  return false;
+}
+function stepLocked(stepId) { return LOCKED_STEPS.indexOf(stepId) >= 0 && !memberUnlocked(); }
+function lockedStep(st, first) {
+  return '<details class="step later"' + (ONLY_STEP === st.id ? ' open' : '') + '><summary>' +
+    '<div class="step-head"><span class="step-num">' + st.n + '</span><span class="step-title">' + st.title + '</span>' +
+    '<span class="step-tag">Members</span><span class="step-chev"></span></div></summary>' +
+    '<p class="step-lede">' + (first ? 'Opens when you join. Your trainer gives you the member code at sign-up, and it is on the first page of your handbook.'
+                                     : 'Opens with the same member code.') + '</p>' +
+    (first ? '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 6px 46px">' +
+      '<input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Member code" aria-label="Member code" ' +
+      'onkeydown="if(event.key===\'Enter\'){__sfmUnlock(this.nextElementSibling);}" ' +
+      'style="font:inherit;padding:11px 14px;border-radius:12px;border:1px solid rgba(128,128,128,.45);background:transparent;color:inherit;min-width:180px">' +
+      '<button type="button" onclick="__sfmUnlock(this)" style="font:inherit;font-weight:600;padding:11px 20px;border-radius:12px;border:0;background:#F37021;color:#fff;cursor:pointer">Unlock</button>' +
+      '<span class="lock-err" style="flex-basis:100%;font-size:14px;color:#e0614f"></span></div>' : '') +
+    '</details>';
+}
+window.__sfmUnlock = function (btn) {
+  var box = btn.parentNode, inp = box.querySelector("input"), err = box.querySelector(".lock-err");
+  if (codeNorm(inp.value) === MEMBER_CODE) { try { localStorage.setItem(UNLOCK_KEY, "1"); } catch (e) {} renderHub(); }
+  else err.textContent = "That code did not match. Your trainer has it.";
+};
 function fmtDate(iso) { try { var d = new Date(iso); return MONTHS[d.getMonth()] + " " + d.getDate(); } catch (e) { return ""; } }
 
 function qCard(q, done, snaps, nx) {
@@ -3979,7 +4032,7 @@ function qCard(q, done, snaps, nx) {
   var req = isPre(q);
   var chip = isDone ? '<span class="chip done">Done</span>'
     : started ? '<span class="chip prog">In progress</span>'
-    : req ? '<span class="chip req">Before session 1</span>' : '<span class="chip">Optional</span>';
+    : req ? '<span class="chip req">Before session 1</span>' : isMust(q) ? '<span class="chip req">Required</span>' : '<span class="chip">Optional</span>';
   return '<a class="qcard' + (isDone ? " is-done" : "") + (nx && nx.id === q.id ? " is-next" : "") + '" href="#" onclick="__sfmGo(\'' + q.id + '\');return false">' +
     '<div class="top"><span class="nm">' + (isDone ? '<span style="color:var(--tech-green-dark)">&#10003;</span> ' : '') + esc(q.name) + '</span>' + chip + '</div>' +
     (isDone && ins.length
@@ -3997,27 +4050,31 @@ function staffLinks() {
       '<button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + url + '\');this.textContent=\'Copied\'">Copy</button></div>';
   };
   return '<div class="hub-links"><h4>Quiz links</h4>' +
-    QUIZZES.map(function (q) { return row(esc(q.name), base + '?q=' + q.id); }).join("") +
+    '<p style="font-size:14px;margin:0 0 10px">Member code for step 3, Enhance your results: <b>' + MEMBER_CODE + '</b>. Links to step 3 carry it.</p>' +
+    QUIZZES.map(function (q) { return row(esc(q.name) + (q.id === "consult" ? ", part 1 (start here)" : q.id === "health" ? ", part 2" : ""), base + '?q=' + q.id + (LOCKED_STEPS.indexOf(q.step) >= 0 ? '&k=' + MEMBER_CODE : '')); }).join("") +
     '<h4 style="margin-top:18px">Step links</h4>' +
-    STEPS.map(function (st) { return row('Step ' + st.n + ': ' + st.title, base + '?step=' + st.id); }).join("") +
+    STEPS.map(function (st) { return row('Step ' + st.n + ': ' + st.title, base + '?step=' + st.id + (LOCKED_STEPS.indexOf(st.id) >= 0 ? '&k=' + MEMBER_CODE : '')); }).join("") +
     row('Everything', base) + '</div>';
 }
 
 function renderHub() {
   var c = makeCtx({}), done = doneMap(), snaps = snapshots(), order = routeOrder(c);
   var shown = QUIZZES.filter(function (q) { return eligibleQ(q, c); });
+  /* Goals and Readiness shows as one card: part 1 until it is saved, then part 2 until both are done. */
+  var midway = !!done.consult && !done.health;
+  shown = shown.filter(function (q) { return q.id === "health" ? midway : q.id === "consult" ? !midway : true; });
   var req = shown.filter(isPre);
   var reqDone = req.filter(function (q) { return done[q.id]; }).length;
   var nDone = shown.filter(function (q) { return done[q.id]; }).length;
   document.getElementById("hubHello").textContent = member.name ? "Hello " + member.name.split(" ")[0] : "Your profile";
-  var FULL_INTRO = 'Welcome to The Smart Fit Method&trade;. Complete the <b>Consultation Screen</b> and <b>Health and Readiness</b> before your first session, ' +
-      'about 8 minutes together, so session 1 is built around you.<br><br>' +
+  var FULL_INTRO = 'Welcome to The Smart Fit Method&trade;. Complete <b>Goals and Readiness</b> before your first session, ' +
+      'about 8 minutes, so session 1 is built around you.<br><br>' +
       'After session 1, the <b>Program Finder</b> shapes your plan and your week for session 2. ' +
       'Through your first month, one short quiz a week further personalizes your program and enhances your results. ' +
       'Everything stays open here if you would like to move faster, and your answers save as you go.';
   var seenIntro = false; try { seenIntro = !!localStorage.getItem(INTRO_KEY); } catch (e) {}
   var shortLede = reqDone < req.length
-    ? 'Start with the <b>Consultation Screen</b> and <b>Health and Readiness</b>, about 8 minutes together, before session 1.'
+    ? 'Start with <b>Goals and Readiness</b>, about 8 minutes, before session 1.'
     : !done.finder
       ? 'You are ready for session 1. Next comes the <b>Program Finder</b>, which shapes your plan and your week for session 2.'
       : 'Your plan and your week are set. Each quiz from here further personalizes your program and enhances your results.';
@@ -4026,8 +4083,8 @@ function renderHub() {
   window.__sfmIntro = function (b) { b.parentNode.innerHTML = FULL_INTRO; };
   try { localStorage.setItem(INTRO_KEY, "1"); } catch (e) {}
   if (false) document.getElementById("hubLede").innerHTML = reqDone < req.length
-    ? 'Welcome to The Smart Fit Method&trade;. Complete the <b>Consultation Screen</b> and <b>Health and Readiness</b> before your first session, ' +
-      'about 8 minutes together, so session 1 is built around you.<br><br>' +
+    ? 'Welcome to The Smart Fit Method&trade;. Complete <b>Goals and Readiness</b> before your first session, ' +
+      'about 8 minutes, so session 1 is built around you.<br><br>' +
       'After session 1, the <b>Program Finder</b> shapes your plan and your week for session 2. ' +
       'Through your first month, one short quiz a week further personalizes your program and enhances your results. ' +
       'Everything stays open here if you would like to move faster, and your answers save as you go.'
@@ -4045,12 +4102,12 @@ function renderHub() {
     ? '<div class="hub-next"><div class="k">Next up &middot; step ' + stepOf(nx).n + (isPre(nx) ? " &middot; before session 1" : "") + '</div>' +
         '<h3>' + esc(nx.name) + '</h3><p>' + esc(nx.blurb) + '</p>' +
         '<button class="btn" onclick="__sfmGo(\'' + nx.id + '\')">' + (formLoad(nx.id) ? "Pick up where you left off" : "Start") + ' &rarr;</button></div>'
-    : '<div class="hub-next"><div class="k">Next up</div><h3>Your Longevity Check Pulse.</h3>' +
+    : '<div class="hub-next"><div class="k">Next up</div><h3>Your Longevity Check-in.</h3>' +
       '<p>' + esc(pulseLine()) + '</p></div>';
 
   /* A step is complete when everything in it that applies to you is done.
      The first incomplete step is "current"; later ones are shown, softened. */
-  var current = null;
+  var current = null, lockShown = false;
   var html = STEPS.map(function (st) {
     var list = shown.filter(function (q) { return q.step === st.id; })
       .sort(function (a, b) { return order.indexOf(a.id) - order.indexOf(b.id); });
@@ -4059,16 +4116,17 @@ function renderHub() {
     var state = complete ? "complete" : (current ? "later" : "current");
     if (!complete && !current) current = st;
     if (ONLY_STEP && st.id !== ONLY_STEP) return "";
+    if (stepLocked(st.id)) { var firstLock = !lockShown; lockShown = true; return lockedStep(st, firstLock); }
     /* Accordion: only the step she is on opens by itself. Done and later steps fold
        to one line; tap to open. A step sent on its own (?step=) always opens. */
     var open = state === "current" || ONLY_STEP === st.id;
     var tag = complete ? d + ' of ' + list.length + ' done'
-      : (list.every(isPre) ? "Before session 1 &middot; " : list.some(isPre) ? "" : "Optional &middot; ") + d + '/' + list.length;
+      : (list.every(isPre) ? "Before session 1 &middot; " : list.some(isPre) ? "" : list.some(isMust) ? "Required &middot; " : "Optional &middot; ") + d + '/' + list.length;
     var pending = list.filter(function (q) { return !done[q.id]; }), finished = list.filter(function (q) { return done[q.id]; });
     return '<details class="step ' + state + '"' + (open ? ' open' : '') + '><summary>' +
       '<div class="step-head"><span class="step-num">' + (complete ? "&#10003;" : st.n) + '</span>' +
         '<span class="step-title">' + st.title + '</span>' +
-        '<span class="step-tag' + (!complete && list.some(isPre) ? " req" : "") + '">' + tag + '</span><span class="step-chev"></span></div></summary>' +
+        '<span class="step-tag' + (!complete && (list.some(isPre) || list.some(isMust)) ? " req" : "") + '">' + tag + '</span><span class="step-chev"></span></div></summary>' +
       (complete ? '' : '<p class="step-lede">' + st.lede + '</p>') +
       (state === "later" && current ? '<p class="step-note">Best after step ' + current.n + '.</p>' : '') +
       pending.map(function (q) { return qCard(q, done, snaps, nx); }).join("") +
@@ -4093,10 +4151,10 @@ renderNextSteps = function () {
 /* ---- the forward line every result screen ends on ---------------------- */
 function pulseLine() {
   var w = pulseWindow();
-  if (w) return "Your Longevity Check Pulse is open now, four minutes before your Check on " + fmtDate(w.checkDate.toISOString()) + ".";
+  if (w) return "Your Longevity Check-in is open now, four minutes before your Check on " + fmtDate(w.checkDate.toISOString()) + ".";
   var nd = nextPulseDate();
-  return nd ? "Your Longevity Check Pulse opens on " + fmtDate(nd.toISOString()) + ", nine days before your Check, so your next block fits where you are."
-            : "Your Longevity Check Pulse opens nine days before your Check, so your next block fits where you are.";
+  return nd ? "Your Longevity Check-in opens on " + fmtDate(nd.toISOString()) + ", nine days before your Check, so your next block fits where you are."
+            : "Your Longevity Check-in opens nine days before your Check, so your next block fits where you are.";
 }
 function forwardLine(q) {
   if (!q) return pulseLine();
@@ -4106,6 +4164,11 @@ function forwardLine(q) {
 /* ---------- BOOT ------------------------------------------- */
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 function init() {
+  var lockedQ = QUIZZES.filter(function (q) { return q.id === VARIANT; })[0];
+  if (lockedQ && stepLocked(lockedQ.step)) {
+    var lp = new URLSearchParams(location.search); lp.delete("q"); lp.set("step", lockedQ.step);
+    location.replace(location.pathname + "?" + lp.toString()); return;
+  }
   flushOutbox();
   renderSyncState();
   if (FORMS[VARIANT]) {
